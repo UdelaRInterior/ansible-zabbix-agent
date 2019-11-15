@@ -187,3 +187,14 @@
   tags:
     - zabbix-agent
     - userparameter
+
+- name: "Create zabbix template"
+  zabbix_template:
+    server_url: "{{ zabbix_url }}"
+    http_login_user: "{{ zabbix_api_http_user | default(omit) }}"
+    http_login_password: "{{ zabbix_api_http_password | default(omit) }}"
+    login_user: "{{ zabbix_api_user }}"
+    login_password: "{{ zabbix_api_pass }}"
+    validate_certs: "{{ zabbix_validate_certs | default(omit) }}"
+    template_xml: "{{ lookup('file', 'zabbix_agent/zabbix_templates/bind_server.j2') }}"
+    state: present
