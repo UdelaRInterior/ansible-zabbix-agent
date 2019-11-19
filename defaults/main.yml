@@ -189,3 +189,9 @@ zabbix_agent_docker_env:
   ZBX_TLSCERTFILE: "{{ zabbix_agent_tlscertfile | default(omit) }}"
   ZBX_TLSKEYFILE: "{{ zabbix_agent_tlskeyfile | default(omit) }}"
   ZBX_TLSPSKIDENTITY: "{{ zabbix_agent_tlspskidentity | default(omit) }}"
+
+# Zabbix custom templates
+zabbix_custom_templates_src: zabbix_custom_templates
+zabbix_custom_templates_xml: 
+  - "{{ zabbix_custom_templates_src }}/zbx_exports_templates.xml"
+  - "{{ zabbix_custom_templates_src }}/my_service_template.xml"

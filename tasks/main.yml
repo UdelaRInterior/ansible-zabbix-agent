@@ -124,6 +124,35 @@
   tags:
     - api
 
+- name: "Install pip on remote host"
+  package:
+    name: python-pip
+    state: present
+  when:
+    - zabbix_api_create_hosts | bool
+
+- name: "Install zabbix-api on remote host"
+  pip:
+    name: zabbix-api
+    state: present
+  when:
+    - zabbix_api_create_hosts | bool
+
+- name: "Create zabbix template" # this module require at least Ansible 2.9
+  zabbix_template:
+    server_url: "{{ zabbix_url }}"
+    http_login_user: "{{ zabbix_api_http_user | default(omit) }}"
+    http_login_password: "{{ zabbix_api_http_password | default(omit) }}"
+    login_user: "{{ zabbix_api_user }}"
+    login_password: "{{ zabbix_api_pass }}"
+    validate_certs: "{{ zabbix_validate_certs | default(omit) }}"
+    template_xml: "{{ item }}"
+    state: present
+  with_file: "{{ zabbix_custom_templates_xml }}"
+  when: 
+    - ansible_version.full is version('2.9.0','>=')
+
+
 - name: "Create a new host or update an existing host's info"
   zabbix_host:
     server_url: "{{ zabbix_url }}"
@@ -150,6 +179,7 @@
     validate_certs: "{{ zabbix_validate_certs | default(omit) }}"
   when:
     - zabbix_api_create_hosts | bool
+    - zabbix_create_template is succeeded
   register: zabbix_api_host_created
   until: zabbix_api_host_created is succeeded
   delegate_to: localhost
@@ -188,13 +218,5 @@
     - zabbix-agent
     - userparameter
 
-- name: "Create zabbix template"
-  zabbix_template:
-    server_url: "{{ zabbix_url }}"
-    http_login_user: "{{ zabbix_api_http_user | default(omit) }}"
-    http_login_password: "{{ zabbix_api_http_password | default(omit) }}"
-    login_user: "{{ zabbix_api_user }}"
-    login_password: "{{ zabbix_api_pass }}"
-    validate_certs: "{{ zabbix_validate_certs | default(omit) }}"
-    template_xml: "{{ lookup('file', 'zabbix_agent/zabbix_templates/bind_server.j2') }}"
-    state: present
+
+
